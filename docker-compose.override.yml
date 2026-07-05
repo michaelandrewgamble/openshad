@@ -1,0 +1,19 @@
+# Host-local concerns only (committed, no secrets): loopback port binding for
+# the Cloudflare Tunnel, and bounded log growth. Auto-merged with
+# docker-compose.yml by `docker compose up`.
+
+services:
+  app:
+    ports:
+      # Loopback only — never expose on LAN/WAN; Cloudflare Tunnel reaches it here.
+      - "127.0.0.1:4000:4000"
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
+    # Reverse-proxy label templates (unused — routing is via Cloudflare Tunnel;
+    # kept as reference, matching the karakeep/shlink convention):
+    # labels:
+    #   - caddy: openshad.michaelgamble.ca
+    #   - caddy.reverse_proxy: "{{upstreams 4000}}"

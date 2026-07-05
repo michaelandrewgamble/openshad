@@ -3,6 +3,13 @@ import { createMDX } from "fumadocs-mdx/next"
 
 /** @type {import('next').NextConfig} */
 const nextConfig = {
+  // Standalone output for the Docker image only (BUILD_STANDALONE=1 set in the
+  // Dockerfile); unset locally so `next start`/`preview` keep working upstream-style.
+  output: process.env.BUILD_STANDALONE === "1" ? "standalone" : undefined,
+  // The full site prerenders thousands of /view and docs pages; some exceed the
+  // default 60s static-generation timeout inside the Docker build.
+  staticPageGenerationTimeout:
+    process.env.BUILD_STANDALONE === "1" ? 600 : undefined,
   devIndicators: false,
   typescript: {
     ignoreBuildErrors: true,

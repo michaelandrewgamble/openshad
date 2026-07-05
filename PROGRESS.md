@@ -39,6 +39,31 @@ design-system opinions in Phase 3. Upstream remote is retained for pulling fixes
 - `/init/v0` is the only runtime path that fetches `public/r/*` JSON over HTTP; everything else is
   in-process calls to `@/registry/config` or direct imports of the generated indices.
 
+## Docker ✅ (2026-07-04)
+
+- [x] Multi-stage `Dockerfile` (node:22-alpine, pinned pnpm, `pnpm fetch` → offline install,
+      workspace package builds, `next build` standalone; non-root runtime, healthcheck)
+- [x] `docker-compose.yml` (build-from-source, `name: openshad`, explicit healthcheck) +
+      `docker-compose.override.yml` (loopback `127.0.0.1:4000`, log rotation) + `renovate.json`
+- [x] `next.config.mjs`: `output: standalone` + 600s static-gen timeout, both gated behind
+      `BUILD_STANDALONE=1` so upstream scripts behave identically outside Docker
+- [x] Image `openshad-app:latest` (1.55GB) verified end-to-end in a container:
+      healthcheck green, /init schema-validated, browser E2E (iframe/shuffle/undo/preset) pass
+
+### Docker notes
+
+- Full unstripped site takes ~50min to bake (thousands of /view + docs pages; some pages need
+  >60s static generation). Expected to drop to minutes after Phase 2 strip.
+- `/init` without params is a 400 **by design** — healthchecks must probe with a full config
+  query string (see Dockerfile comment).
+- Deployment: manual `docker compose up -d --build` (host-services redeploy loop only pulls
+  registry images, never builds). Cloudflare Tunnel ingress `openshad.michaelgamble.ca →
+  http://localhost:4000` to be added in the Zero Trust dashboard.
+- `@vercel/analytics` 404s (`/_vercel/insights/script.js`) in any non-Vercel deployment —
+  console noise only; removed in Phase 2 anyway.
+- og:url metadata bakes `NEXT_PUBLIC_APP_URL` at build time — pass the real public URL as a
+  build arg for production images.
+
 ## Phase 2 — Strip to OpenShad (not started; awaits explicit go)
 
 - [ ] Reachability analysis from `/create`, `/init`, registry pipeline, shared app infra (parallel agents)

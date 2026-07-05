@@ -1,0 +1,36 @@
+# OpenShad — customized fork of shadcn-ui/ui (/create configurator + /init API).
+#
+# Builds locally from source by default because the code itself is the
+# customization. If OpenShad ever publishes images, comment `build:` and pin:
+#   image: ghcr.io/michaelandrewgamble/openshad:<tag>
+#
+# No ports here by convention — loopback bindings live in docker-compose.override.yml
+# so this file stays host-agnostic. Public routing is a Cloudflare Tunnel ingress
+# rule (openshad.michaelgamble.ca -> http://localhost:4000) managed in the
+# Cloudflare Zero Trust dashboard.
+
+# Explicit project name so named volumes/containers stay stable regardless of
+# the checkout folder name.
+name: openshad
+
+services:
+  app:
+    build:
+      context: .
+      args:
+        NEXT_PUBLIC_APP_URL: ${NEXT_PUBLIC_APP_URL:-http://localhost:4000}
+        NEXT_PUBLIC_V0_URL: ${NEXT_PUBLIC_V0_URL:-https://v0.dev}
+    container_name: openshad
+    restart: unless-stopped
+    environment:
+      NEXT_PUBLIC_APP_URL: ${NEXT_PUBLIC_APP_URL:-http://localhost:4000}
+      NEXT_PUBLIC_V0_URL: ${NEXT_PUBLIC_V0_URL:-https://v0.dev}
+    # Explicit healthcheck (never rely on the image's implicit one): the
+    # host-services redeploy worker polls compose .Health for rollback decisions.
+    healthcheck:
+      # /init requires a full design-system config — bare /init is a 400 by design.
+      test: ["CMD-SHELL", "wget --spider -q 'http://127.0.0.1:4000/init?base=base&style=nova&iconLibrary=lucide&baseColor=neutral&theme=neutral&font=inter&menuAccent=subtle&menuColor=default&radius=default' || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 30s
