@@ -6,7 +6,7 @@
 #
 # No ports here by convention — loopback bindings live in docker-compose.override.yml
 # so this file stays host-agnostic. Public routing is a Cloudflare Tunnel ingress
-# rule (openshad.michaelgamble.ca -> http://localhost:4000) managed in the
+# rule (openshad.michaelgamble.ca -> http://localhost:4100) managed in the
 # Cloudflare Zero Trust dashboard.
 
 # Explicit project name so named volumes/containers stay stable regardless of
@@ -18,12 +18,12 @@ services:
     build:
       context: .
       args:
-        NEXT_PUBLIC_APP_URL: ${NEXT_PUBLIC_APP_URL:-http://localhost:4000}
+        NEXT_PUBLIC_APP_URL: ${NEXT_PUBLIC_APP_URL:-http://localhost:4100}
         NEXT_PUBLIC_V0_URL: ${NEXT_PUBLIC_V0_URL:-https://v0.dev}
     container_name: openshad
     restart: unless-stopped
     environment:
-      NEXT_PUBLIC_APP_URL: ${NEXT_PUBLIC_APP_URL:-http://localhost:4000}
+      NEXT_PUBLIC_APP_URL: ${NEXT_PUBLIC_APP_URL:-http://localhost:4100}
       NEXT_PUBLIC_V0_URL: ${NEXT_PUBLIC_V0_URL:-https://v0.dev}
     # Explicit healthcheck (never rely on the image's implicit one): the
     # host-services redeploy worker polls compose .Health for rollback decisions.

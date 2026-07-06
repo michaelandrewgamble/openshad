@@ -6,7 +6,8 @@ services:
   app:
     ports:
       # Loopback only — never expose on LAN/WAN; Cloudflare Tunnel reaches it here.
-      - "127.0.0.1:4000:4000"
+      # Host port 4100 (not 4000): Cursor's Remote feature squats on localhost:4000.
+      - "127.0.0.1:4100:4000"
     logging:
       driver: json-file
       options:
