@@ -115,7 +115,7 @@
     "typescript": "^5",
     "typescript-eslint": "^8.46.2",
     "unist-builder": "3.0.0",
-    "unist-util-visit": "^4.1.2"
+    "unist-util-visit": "^5.1.0"
   },
   "prettier": {
     "endOfLine": "lf",
